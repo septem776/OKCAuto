@@ -1,41 +1,47 @@
 #!/usr/bin/env python
 #coding=utf8
 
-import http.client, json
+import urllib.request, json
 import time
+import hashlib
 
-def GetData(httpClient, url):
-    try:
-        httpClient.request('GET', url)
-        response = httpClient.getresponse()
-        data = response.read().decode('utf-8')
-        jsondata = json.loads(data)
-        return jsondata
-    except Exception as e:
-        print(e)
-        return None
 
-def GetTicker(httpClient):
-    url = '/api/ticker.do?symbol=ltc_cny'
-    jaondata = GetData(httpClient, url)
-    print(jaondata)
+def getBTCTicker():
+    response = urllib.request.urlopen('https://www.okcoin.com/api/ticker.do')
+    print(response.status)
+    data = response.read().decode('utf-8')
+    jsondata = json.loads(data)
+    return jsondata
+
+def getBTCTickerVol():
+    jdata = getBTCTicker()
+    return jdata['ticker']['vol']
+
+def getDepth(httpClient):
     pass
 
-def GetDepth(httpClient):
-
-    pass
-
+def readUserInfo():
+    # TODO: read partner and secretKey from file
+    partner = ''
+    pri_key = ''
+    sign = ''
+    return (partner, sign)
 
 if __name__ == '__main__':
-    httpClient = None
-
     try:
-        httpClient = http.client.HTTPConnection('www.okcoin.com', 80, timeout=30)
-        for i in range(1):
-            GetTicker(httpClient)
-            time.sleep(0.5)
+
+        (partner, sign) = readUserInfo()
+        data = urllib.parse.urlencode({'partner' : partner, 'sign' : sign})
+        data = data.encode('utf-8')
+        request = urllib.request.Request('https://www.okcoin.com/api/userinfo.do')
+        request.add_header("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
+        f = urllib.request.urlopen(request, data)
+        print(f.status)
+        print(f.read())
+        # for i in range(1):
+        #     GetTicker(httpClient)
+        #     time.sleep(0.5)
     except Exception as e:
         print(e)
     finally:
-        if httpClient:
-            httpClient.close()
+        pass
