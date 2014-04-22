@@ -1,10 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 #coding=utf8
 
 import urllib.request, json
+import configparser
 import time
 import hashlib
-
+from okc import *
 
 def getBTCTicker():
     response = urllib.request.urlopen('https://www.okcoin.com/api/ticker.do')
@@ -20,24 +21,13 @@ def getBTCTickerVol():
 def getDepth(httpClient):
     pass
 
-def readUserInfo():
-    # TODO: read partner and secretKey from file
-    partner = ''
-    pri_key = ''
-    sign = ''
-    return (partner, sign)
 
 if __name__ == '__main__':
     try:
-
-        (partner, sign) = readUserInfo()
-        data = urllib.parse.urlencode({'partner' : partner, 'sign' : sign})
-        data = data.encode('utf-8')
-        request = urllib.request.Request('https://www.okcoin.com/api/userinfo.do')
-        request.add_header("Content-Type","application/x-www-form-urlencoded;charset=utf-8")
-        f = urllib.request.urlopen(request, data)
-        print(f.status)
-        print(f.read())
+        okcoin = OKC()
+        (partner, sign) = okcoin.readUserInfo()
+        account = okcoin.getUserAccount(partner, sign)
+        print(account)
         # for i in range(1):
         #     GetTicker(httpClient)
         #     time.sleep(0.5)
