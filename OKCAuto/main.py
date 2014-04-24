@@ -25,9 +25,8 @@ def getDepth(httpClient):
 if __name__ == '__main__':
     try:
         okcoin = OKC()
-        (partner, sign) = okcoin.readUserInfo()
-        account = okcoin.getUserAccount(partner, sign)
-        print(account)
+
+        #okcoin.trade_ltc('buy', 1, 0.23)
         # for i in range(1):
         #     GetTicker(httpClient)
         #     time.sleep(0.5)
