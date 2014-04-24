@@ -34,7 +34,7 @@ def getBTCTrades(since=0):
     url = 'https://www.okcoin.com/api/trades.do'
     if since > 0:
         url += '?since=' + str(since)
-    print(url)
+    # print(url)
     response = urllib.request.urlopen(url)
     data = response.read().decode('utf-8')
     jsondata = json.loads(data)
@@ -64,6 +64,10 @@ class OKC:
         self.total_assets = 0.0
         self.partner, self.sign = self.readUserInfo()
         self.accountinfo = self.getUserAccount(self.partner, self.sign)
+        self.canSell = True
+        self.canBuy = True
+        self.buyprice = 0.0
+        self.sellprice = 0.0
         pass
 
 
