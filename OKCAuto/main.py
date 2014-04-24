@@ -7,16 +7,6 @@ import time
 import hashlib
 from okc import *
 
-
-
-def getBTCTickerVol():
-    jdata = getBTCTicker()
-    return jdata['ticker']['vol']
-
-def getDepth(httpClient):
-    pass
-
-
 if __name__ == '__main__':
     try:
         okcoin = OKC()
