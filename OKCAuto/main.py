@@ -25,7 +25,10 @@ def getDepth(httpClient):
 if __name__ == '__main__':
     try:
         okcoin = OKC()
-
+        orders = okcoin.getOrder_ltc()
+        for ord in orders:
+            okcoin.cancelOrder_ltc(ord['orders_id'])
+            time.sleep(2)
         #okcoin.trade_ltc('buy', 1, 0.23)
         # for i in range(1):
         #     GetTicker(httpClient)

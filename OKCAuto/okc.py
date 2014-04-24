@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #coding=utf8
 
+import sys
 import configparser, hashlib, urllib, json
 
 
@@ -21,7 +22,7 @@ class OKC:
         pass
 
 
-    def __signature(self, params):
+    def _signature(self, params):
         s = ''
         for k in sorted(params.keys()):
             if len(s) > 0:
@@ -71,20 +72,20 @@ class OKC:
         return jsondata
 
 
-    def trade_ltc(self, type, rate=None, amount=None):
+    def trade(self, symbol, type, rate=None, amount=None):
         # type : 'buy' / 'sell' / 'buy_market' / 'sell_market'
         # rate : 0 < rate < 1000000 ;  if 'buy_market', set buy cny amount
         # amount : btc > 0.01, ltc > 0.1; if 'sell_market', set sell btc/ltc number
         param = {
             'partner': self.partner,
-            'symbol': 'ltc_cny',
+            'symbol': symbol,
             'type': type
         }
         if rate is not None:
             param['rate'] = rate
         if amount is not None:
             param['amount'] = amount
-        param['sign'] = self.__signature(param)
+        param['sign'] = self._signature(param)
         data = urllib.parse.urlencode(param).encode('utf-8')
         req = urllib.request.Request('https://www.okcoin.com/api/trade.do')
         req.add_header("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
@@ -97,4 +98,74 @@ class OKC:
             print("ErrCode=%d" % jsondata['errorCode'])
         else:
             print("order %s ltc success, order_id=%d" % (type, jsondata['order_id']))
+        return result
+
+    # trade ltc interface
+    def buy_ltc(self, rate, amount):
+        return self.trade('ltc_cny', 'buy', rate, amount)
+
+    def sell_ltc(self, rate, amount):
+        return self.trade('ltc_cny', 'sell', rate, amount)
+
+    def buyMarket_ltc(self, rate):
+        return self.trade('ltc_cny', 'buy_market', rate)
+
+    def sellMarket_ltc(self, amount):
+        return self.trade('ltc_cny', 'sell_market', amount=amount)
+
+    # trade btc interface
+    def buy_btc(self, rate, amount):
+        return self.trade('btc_cny', 'buy', rate, amount)
+
+    def sell_btc(self, rate, amount):
+        return self.trade('btc_cny', 'sell', rate, amount)
+
+    def buyMarket_btc(self, rate):
+        return self.trade('btc_cny', 'buy_market', rate)
+
+    def sellMarket_btc(self, amount):
+        return self.trade('btc_cny', 'sell_market', amount=amount)
+
+    def getOrder_ltc(self, orderid = -1):
+        # get ltc orders
+        param = {
+            'partner' : self.partner,
+            'order_id' : orderid,
+            'symbol' : 'ltc_cny'
+        }
+        param['sign'] = self._signature(param)
+        data = urllib.parse.urlencode(param).encode('utf-8')
+        req = urllib.request.Request('https://www.okcoin.com/api/getorder.do')
+        req.add_header("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
+        f = urllib.request.urlopen(req, data)
+        print(f.status)
+        jsondata = json.loads(f.read().decode('utf-8'))
+        print(jsondata)
+        result = jsondata['result']
+        if result == False:
+            print("ErrCode=%d" % jsondata['errorCode'])
+            return None
+
+        orders = jsondata['orders']
+        return orders
+
+    def cancelOrder_ltc(self, orderid):
+        param = {
+            'partner' : self.partner,
+            'order_id' : orderid,
+            'symbol' : 'ltc_cny'
+        }
+        param['sign'] = self._signature(param)
+        data = urllib.parse.urlencode(param).encode('utf-8')
+        req = urllib.request.Request('https://www.okcoin.com/api/cancelorder.do')
+        req.add_header("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
+        f = urllib.request.urlopen(req, data)
+        print(f.status)
+        jsondata = json.loads(f.read().decode('utf-8'))
+        print(jsondata)
+        result = jsondata['result']
+        if result == False:
+            print(sys._getframe().f_code.co_name + ':' + sys._getframe().f_lineno)
+            print("ErrCode=%d" % jsondata['errorCode'])
+
         return result
