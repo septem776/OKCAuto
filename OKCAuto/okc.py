@@ -4,6 +4,51 @@
 import sys
 import configparser, hashlib, urllib, json
 
+def getBTCTicker():
+    response = urllib.request.urlopen('https://www.okcoin.com/api/ticker.do')
+    print(response.status)
+    data = response.read().decode('utf-8')
+    jsondata = json.loads(data)
+    return jsondata
+
+def getLTCTicker():
+    response = urllib.request.urlopen('https://www.okcoin.com/api/ticker.do?symbol=ltc_cny')
+    print(response.status)
+    data = response.read().decode('utf-8')
+    jsondata = json.loads(data)
+    return jsondata
+
+def getBTCDepth():
+    response = urllib.request.urlopen('https://www.okcoin.com/api/depth.do')
+    data = response.read().decode('utf-8')
+    jsondata = json.loads(data)
+    return jsondata
+
+def getLTCDepth():
+    response = urllib.request.urlopen('https://www.okcoin.com/api/depth.do?symbol=ltc_cny')
+    data = response.read().decode('utf-8')
+    jsondata = json.loads(data)
+    return jsondata
+
+def getBTCTrades(since=0):
+    url = 'https://www.okcoin.com/api/trades.do'
+    if since > 0:
+        url += '?since=' + str(since)
+    print(url)
+    response = urllib.request.urlopen(url)
+    data = response.read().decode('utf-8')
+    jsondata = json.loads(data)
+    return jsondata
+
+def getLTCTrades(since=0):
+    url = 'https://www.okcoin.com/api/trades.do?symbol=ltc_cny'
+    if since > 0:
+        url += '&since=' + str(since)
+    print(url)
+    response = urllib.request.urlopen(url)
+    data = response.read().decode('utf-8')
+    jsondata = json.loads(data)
+    return jsondata
 
 class OKC:
     def __init__(self):
