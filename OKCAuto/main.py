@@ -7,12 +7,31 @@ import time
 import hashlib
 from okc import *
 
-def getBTCVol():
-    totalval = 0.0
-    orders = getBTCTrades()
+g_lasttid = 0
+g_totalvol = 0.0
+g_maxprice = 0.0
+g_minprice = 999999.999999
+
+def getLTCPrice():
+    global g_lasttid, g_totalvol, g_maxprice, g_minprice
+    orders = getLTCTrades()
+    lownum = 0
+    highnum = 0
+    actualnum = 0
     for ord in orders:
-        totalval += float(ord['amount'])
-    return totalval
+        if g_lasttid < ord['tid']:
+            actualnum += 1
+            g_lasttid = int(ord['tid'])
+            g_totalvol += float(ord['amount'])
+            if g_minprice > float(ord['price']) :
+                g_minprice = float(ord['price'])
+                lownum += 1
+            if g_maxprice < float(ord['price']) :
+                g_maxprice = float(ord['price'])
+                highnum += 1
+
+    return highnum - lownum, actualnum
+
 
 if __name__ == '__main__':
     try:
@@ -20,41 +39,14 @@ if __name__ == '__main__':
         total = 0.0
         num = 0
         while True:
-            ticker = getBTCTicker()
+            ticker = getLTCTicker()
             last = float(ticker['ticker']['last'])
             if last == 0.0:
                 continue
-            if okcoin.buyprice == 0.0:
-                okcoin.buyprice = last
-            cur_vol = getBTCVol()
-            total += cur_vol
-            num += 1
-            avg = total / num
-            rate = cur_vol / avg
-            print("rate=%f, last=%f, buyprice=%f, sellprice=%f, vol=%f" % (rate, last, okcoin.buyprice, okcoin.sellprice, cur_vol))
-            print("last/buyprice=%f" % (last / okcoin.buyprice))
-            if rate > 1.3:
-                okcoin.sellprice = last
+            trend, actnum = getLTCPrice()
+            print("trend=%d, actnum=%d" % (trend, actnum))
 
-            if okcoin.canSell and last / okcoin.buyprice > 1.005:
-                okcoin.sellMarket_btc(1)
-                print("sell 1 btc on market price")
-                okcoin.canSell = False
-                okcoin.getUserAccount()
-                okcoin.sellprice = last
-
-            if okcoin.canSell == False and last / okcoin.sellprice < 0.99:
-                okcoin.buyMarket_btc(okcoin.free_cny)
-                okcoin.canSell = True
-                okcoin.getUserAccount()
-                okcoin.buyprice = last
-                print("buy btc on price %d" % last)
-
-            if num > 900:
-                num = 0
-                total = 0.0
-
-            time.sleep(1)
+            time.sleep(5)
     except Exception as e:
         print(e)
     finally:

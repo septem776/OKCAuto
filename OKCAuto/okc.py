@@ -6,14 +6,14 @@ import configparser, hashlib, urllib, json
 
 def getBTCTicker():
     response = urllib.request.urlopen('https://www.okcoin.com/api/ticker.do')
-    print(response.status)
+    #print(response.status)
     data = response.read().decode('utf-8')
     jsondata = json.loads(data)
     return jsondata
 
 def getLTCTicker():
     response = urllib.request.urlopen('https://www.okcoin.com/api/ticker.do?symbol=ltc_cny')
-    print(response.status)
+    #print(response.status)
     data = response.read().decode('utf-8')
     jsondata = json.loads(data)
     return jsondata
@@ -28,6 +28,7 @@ def getLTCDepth():
     response = urllib.request.urlopen('https://www.okcoin.com/api/depth.do?symbol=ltc_cny')
     data = response.read().decode('utf-8')
     jsondata = json.loads(data)
+    print(jsondata)
     return jsondata
 
 def getBTCTrades(since=0):
@@ -44,10 +45,11 @@ def getLTCTrades(since=0):
     url = 'https://www.okcoin.com/api/trades.do?symbol=ltc_cny'
     if since > 0:
         url += '&since=' + str(since)
-    print(url)
+    #print(url)
     response = urllib.request.urlopen(url)
     data = response.read().decode('utf-8')
     jsondata = json.loads(data)
+    #print(jsondata)
     return jsondata
 
 class OKC:
@@ -63,7 +65,7 @@ class OKC:
         self.freezed_cny = 0.0
         self.total_assets = 0.0
         self.partner, self.sign = self.readUserInfo()
-        self.accountinfo = self.getUserAccount(self.partner, self.sign)
+        self.accountinfo = self.getUserAccount()
         self.canSell = True
         self.canBuy = True
         self.buyprice = 0.0
@@ -98,8 +100,8 @@ class OKC:
         return (partner, sign)
 
 
-    def getUserAccount(self, partner, sign):
-        data = urllib.parse.urlencode({'partner': partner, 'sign': sign})
+    def getUserAccount(self):
+        data = urllib.parse.urlencode({'partner': self.partner, 'sign': self.sign})
         data = data.encode('utf-8')
         request = urllib.request.Request('https://www.okcoin.com/api/userinfo.do')
         request.add_header("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
